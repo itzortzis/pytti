@@ -113,7 +113,7 @@ class Training():
         self.comps.model.train(True)
         current_score = 0.0
         current_loss = 0.0
-        self.metrics.metric.reset()
+        self.metrics.f1.reset()
         # print("Simple epoch training...")
 
         step = 0
@@ -125,11 +125,11 @@ class Training():
             loss = self.comps.loss_fn(outputs, y.float())
             loss.backward()
             self.comps.opt.step()
-            score = self.metrics.metric.update(outputs, y)
+            score = self.metrics.f1.update(outputs, y)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
-        epoch_score = self.metrics.metric.compute()
-        self.metrics.metric.reset()
+        epoch_score = self.metrics.f1.compute()
+        self.metrics.f1.reset()
         epoch_loss  = current_loss / len(self.dpp.train_ldr.dataset)
 
         return epoch_score.item(), epoch_loss.item()
@@ -149,7 +149,7 @@ class Training():
         self.comps.model.train(False)
         current_score = 0.0
         current_loss = 0.0
-        self.metrics.metric.reset()
+        self.metrics.f1.reset()
 
         for x, y in self.dpp.valid_ldr:
             x, y = self.prepare_data(x, y)
@@ -158,10 +158,10 @@ class Training():
                 outputs = self.comps.model(x)
             
             loss = self.comps.loss_fn(outputs, y.float())
-            score = self.metrics.metric.update(outputs, y)
+            score = self.metrics.f1.update(outputs, y)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
-        epoch_score = self.metrics.metric.compute()
+        epoch_score = self.metrics.f1.compute()
         epoch_loss  = current_loss / len(self.dpp.valid_ldr.dataset)
 
         return epoch_score.item(), epoch_loss.item()
@@ -178,7 +178,7 @@ class Training():
         self.comps.model.eval()
         current_score = 0.0
         current_loss = 0.0
-        self.metrics.metric.reset()
+        self.metrics.f1.reset()
         for x, y in self.dpp.test_ldr:
             x, y = self.prepare_data(x, y)
 
@@ -186,10 +186,10 @@ class Training():
                 outputs = self.comps.model(x)
 
             # preds = torch.softmax(outputs, dim=1)
-            score = self.metrics.metric.update(outputs, y)
+            score = self.metrics.f1.update(outputs, y)
 
-        test_set_score = self.metrics.metric.compute()
-        self.metrics.metric.reset()
+        test_set_score = self.metrics.f1.compute()
+        self.metrics.f1.reset()
         return test_set_score.item()
 
 
@@ -197,9 +197,9 @@ class Training():
         path_to_model = self.comps.trained_models + self.comps.inf_model
         self.comps.model.load_state_dict(torch.load(path_to_model))
         self.comps.model.eval()
-        self.metric = F1Score(task="multiclass", num_classes=5)
-        self.metric.to(self.comps.device)
-        # self.metric.reset()
+        self.f1 = F1Score(task="multiclass", num_classes=5)
+        self.f1.to(self.comps.device)
+        # self.f1.reset()
         for x, y in set_ldr:
             x,  y = self.prepare_data(x, y)
 
@@ -207,8 +207,8 @@ class Training():
                 outputs = self.comps.model(x)
 
             preds = torch.argmax(outputs, dim=1)
-            self.metric.update(preds, y)
+            self.f1.update(preds, y)
 
-        inf_score = self.metric.compute()
-        self.metric.reset()
+        inf_score = self.f1.compute()
+        self.f1.reset()
         return inf_score.item()

@@ -20,8 +20,8 @@ class Metrics:
         
     def init_metrics(self):
         print("Initializing metrics")
-        self.metric = F1Score(task="multiclass", num_classes=5)
-        self.metric.to(self.comps.device)
+        self.f1 = F1Score(task="multiclass", num_classes=5)
+        self.f1.to(self.comps.device)
         self.get_current_timestamp()
         self.start_time = time.time()
         
