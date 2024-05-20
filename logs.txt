@@ -1,1 +1,1 @@
-0.0 0.0 
+1.0 41 1.0 ./generated/trained_models/INBreast_bad_0_1000_1716240764.pth

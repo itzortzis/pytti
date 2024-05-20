@@ -125,7 +125,9 @@ class Training():
             loss = self.comps.loss_fn(outputs, y.float())
             loss.backward()
             self.comps.opt.step()
-            score = self.metrics.f1.update(outputs, y)
+            preds = torch.argmax(outputs, dim=1)
+            labels = torch.argmax(y, dim=1)
+            score = self.metrics.f1.update(preds, labels)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
         epoch_score = self.metrics.f1.compute()
@@ -158,7 +160,9 @@ class Training():
                 outputs = self.comps.model(x)
             
             loss = self.comps.loss_fn(outputs, y.float())
-            score = self.metrics.f1.update(outputs, y)
+            preds = torch.argmax(outputs, dim=1)
+            labels = torch.argmax(y, dim=1)
+            score = self.metrics.f1.update(preds, labels)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
         epoch_score = self.metrics.f1.compute()
@@ -185,8 +189,9 @@ class Training():
             with torch.no_grad():
                 outputs = self.comps.model(x)
 
-            # preds = torch.softmax(outputs, dim=1)
-            score = self.metrics.f1.update(outputs, y)
+            preds = torch.argmax(outputs, dim=1)
+            labels = torch.argmax(y, dim=1)
+            score = self.metrics.f1.update(preds, labels)
 
         test_set_score = self.metrics.f1.compute()
         self.metrics.f1.reset()
