@@ -1,0 +1,216 @@
+
+import time
+import torch
+import calendar
+import numpy as np
+from tqdm import tqdm
+from torchmetrics import F1Score
+
+
+
+from pti.pre_processing import DataPreprocesing
+from pti.initialization import Init
+from pti.print_info import Printer
+from pti.metrics import Metrics
+
+
+class Training():
+
+    def __init__(self, comps, params, paths):
+        self.comps = Init(comps, params, paths)
+        self.comps.run()
+        self.init()
+
+
+    def init(self):
+        self.pr = Printer(self.comps)
+        self.dpp = DataPreprocesing(self.comps.sets)
+        self.dpp.run()
+        self.metrics = Metrics(self.comps)
+
+        if self.comps.device == 'cuda':
+            print("Cuda available")
+            self.comps.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            self.comps.model = self.comps.model.to(self.comps.device)
+
+
+
+
+    # Main_training:
+    # --------------
+    # The supervisor of the training procedure.
+    def main_training(self):
+        if not (self.pr.print_train_details()):
+            return
+        self.metrics.init_metrics()
+        for epoch in tqdm(range(self.comps.epochs)):
+            
+            tr_score, tr_loss = self.epoch_training()
+            vl_score, vl_loss = self.epoch_validation()
+
+            self.metrics.losses[epoch, 0] = tr_loss
+            self.metrics.losses[epoch, 1] = vl_loss
+            self.metrics.scores[epoch, 0] = tr_score
+            self.metrics.scores[epoch, 1] = vl_score
+
+            print()
+            print("\t Training - Score: ", tr_score, " Loss: ", tr_loss)
+            print("\t Validation: - Score: ", vl_score, " Loss: ", vl_loss)
+            print()
+            self.metrics.save_model_weights(epoch, vl_score, self.comps.model.state_dict())
+            self.comps.model_dict = self.comps.model.state_dict()
+        self.metrics.calculate_exec_time()
+        self.metrics.test_set_score = self.inference()
+        self.metrics.update_log()
+
+
+    
+
+
+    
+
+
+    
+
+    # Prepare_data:
+    # -------------
+    # Given x and y tensors, this function applies some basic
+    # transformations/changes related to dimensions, data types,
+    # and device.
+    #
+    # --> x: tensor containing a batch of input images
+    # --> y: tensor containing a batch of annotation masks
+    # <-- x, y: the updated tensors
+    def prepare_data(self, x, y):
+        x = torch.unsqueeze(x, 1)
+
+        x = x.to(torch.float32)
+        y = y.to(torch.int64)
+
+        x = x.to(self.comps.device)
+        y = y.to(self.comps.device)
+
+        return x, y
+        
+  
+    def argmax_ys(self, labels, preds):
+        s_preds = torch.softmax(preds, dim=1)
+        a_preds = torch.argmax(preds, dim=1)
+        a_labels = torch.argmax(labels, dim=1)
+
+        return s_preds, a_preds, a_labels
+
+    # Epoch_training:
+    # ---------------
+    # This function is used for implementing the training
+    # procedure during a single epoch.
+    #
+    # <-- epoch_score: performance score achieved during
+    #                  the training
+    # <-- epoch_loss: the loss function score achieved during
+    #                 the training
+    def epoch_training(self):
+        self.comps.model.train(True)
+        current_score = 0.0
+        current_loss = 0.0
+        self.metrics.metric.reset()
+        # print("Simple epoch training...")
+
+        step = 0
+        for x, y in self.dpp.train_ldr:
+            x, y = self.prepare_data(x, y)
+            step += 1
+            self.comps.opt.zero_grad()
+            outputs = self.comps.model(x)
+            s_preds, a_preds, labels = self.argmax_ys(y, outputs)
+            loss = self.comps.loss_fn(s_preds, labels)
+            loss.backward()
+            self.comps.opt.step()
+            score = self.metrics.metric.update(s_preds, y)
+            current_loss  += loss * self.dpp.train_ldr.batch_size
+
+        epoch_score = self.metrics.metric.compute()
+        self.metrics.metric.reset()
+        epoch_loss  = current_loss / len(self.dpp.train_ldr.dataset)
+
+        return epoch_score.item(), epoch_loss.item()
+
+    
+ 
+    # Epoch_validation:
+    # ---------------
+    # This function is used for implementing the validation
+    # procedure during a single epoch.
+    #
+    # <-- epoch_score: performance score achieved during
+    #                  the validation
+    # <-- epoch_loss: the loss function score achieved during
+    #                 the validation
+    def epoch_validation(self):
+        self.comps.model.train(False)
+        current_score = 0.0
+        current_loss = 0.0
+        self.metrics.metric.reset()
+
+        for x, y in self.dpp.valid_ldr:
+            x, y = self.prepare_data(x, y)
+
+            with torch.no_grad():
+                outputs = self.comps.model(x)
+            
+            s_preds, a_preds, labels = self.argmax_ys(y, outputs)
+            loss = 0 #self.comps.loss_fn(s_preds, y)
+            score = self.metrics.metric.update(s_preds, y)
+            current_loss  += loss * self.dpp.train_ldr.batch_size
+
+        epoch_score = self.metrics.metric.compute()
+        epoch_loss  = current_loss / len(self.dpp.valid_ldr.dataset)
+
+        return epoch_score.item(), 0#epoch_loss.item()
+
+
+    # Inference:
+    # ----------
+    # Applies inference to the testing set extracted from
+    # the input dataset during the initialization phase
+    #
+    # <-- test_set_score: the score achieved by the trained model
+    def inference(self):
+        self.comps.model.load_state_dict(self.comps.model_dict)
+        self.comps.model.eval()
+        current_score = 0.0
+        current_loss = 0.0
+        self.metrics.metric.reset()
+        for x, y in self.dpp.test_ldr:
+            x, y = self.prepare_data(x, y)
+
+            with torch.no_grad():
+                outputs = self.comps.model(x)
+
+            preds = torch.softmax(outputs, dim=1)
+            score = self.metrics.metric.update(preds, y)
+
+        test_set_score = self.metrics.metric.compute()
+        self.metrics.metric.reset()
+        return test_set_score.item()
+
+
+    def ext_inference(self, set_ldr):
+        path_to_model = self.comps.trained_models + self.comps.inf_model
+        self.comps.model.load_state_dict(torch.load(path_to_model))
+        self.comps.model.eval()
+        self.metric = F1Score(task="multiclass", num_classes=5)
+        self.metric.to(self.comps.device)
+        # self.metric.reset()
+        for x, y in set_ldr:
+            x,  y = self.prepare_data(x, y)
+
+            with torch.no_grad():
+                outputs = self.comps.model(x)
+
+            preds = torch.argmax(outputs, dim=1)
+            self.metric.update(preds, y)
+
+        inf_score = self.metric.compute()
+        self.metric.reset()
+        return inf_score.item()
