@@ -94,9 +94,9 @@ class Training():
         
   
     def argmax_ys(self, labels, preds):
-        s_preds = torch.softmax(preds, dim=1)
-        a_preds = torch.argmax(preds, dim=1)
-        a_labels = torch.argmax(labels, dim=1)
+        s_preds = torch.softmax(preds, dim=0)
+        a_preds = torch.argmax(preds, dim=0)
+        a_labels = torch.argmax(labels, dim=0)
 
         return s_preds, a_preds, a_labels
 
@@ -122,11 +122,10 @@ class Training():
             step += 1
             self.comps.opt.zero_grad()
             outputs = self.comps.model(x)
-            s_preds, a_preds, labels = self.argmax_ys(y, outputs)
-            loss = self.comps.loss_fn(s_preds, labels)
+            loss = self.comps.loss_fn(outputs, y.float())
             loss.backward()
             self.comps.opt.step()
-            score = self.metrics.metric.update(s_preds, y)
+            score = self.metrics.metric.update(outputs, y)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
         epoch_score = self.metrics.metric.compute()
@@ -158,15 +157,14 @@ class Training():
             with torch.no_grad():
                 outputs = self.comps.model(x)
             
-            s_preds, a_preds, labels = self.argmax_ys(y, outputs)
-            loss = 0 #self.comps.loss_fn(s_preds, y)
-            score = self.metrics.metric.update(s_preds, y)
+            loss = self.comps.loss_fn(outputs, y.float())
+            score = self.metrics.metric.update(outputs, y)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
         epoch_score = self.metrics.metric.compute()
         epoch_loss  = current_loss / len(self.dpp.valid_ldr.dataset)
 
-        return epoch_score.item(), 0#epoch_loss.item()
+        return epoch_score.item(), epoch_loss.item()
 
 
     # Inference:
@@ -187,8 +185,8 @@ class Training():
             with torch.no_grad():
                 outputs = self.comps.model(x)
 
-            preds = torch.softmax(outputs, dim=1)
-            score = self.metrics.metric.update(preds, y)
+            # preds = torch.softmax(outputs, dim=1)
+            score = self.metrics.metric.update(outputs, y)
 
         test_set_score = self.metrics.metric.compute()
         self.metrics.metric.reset()
