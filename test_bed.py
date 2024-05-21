@@ -4,6 +4,7 @@ import numpy as np
 
 from pti.training import Training
 from pti.models import ConvNeuralNet_b
+from pti.models import AlexNet
 
 
 
@@ -16,7 +17,8 @@ test_set_y = np.zeros((50))
 
 learning_rate = 0.00000001
 classes = 5
-model = ConvNeuralNet_b(classes)
+# model = ConvNeuralNet_b(classes)
+model = AlexNet(classes)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 loss_fn = torch.nn.CrossEntropyLoss()
 opt = torch.optim.Adam(model.parameters(), lr = learning_rate)
