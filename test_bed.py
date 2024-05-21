@@ -16,7 +16,7 @@ test_set_x = np.zeros((50, 256, 256))
 test_set_y = np.zeros((50))
 
 learning_rate = 0.00000001
-classes = 5
+classes = 2
 # model = ConvNeuralNet_b(classes)
 model = AlexNet(classes)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

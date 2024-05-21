@@ -127,6 +127,7 @@ class Training():
             self.comps.opt.step()
             preds = torch.argmax(outputs, dim=1)
             labels = torch.argmax(y, dim=1)
+            # print(preds,labels)
             score = self.metrics.f1.update(preds, labels)
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
