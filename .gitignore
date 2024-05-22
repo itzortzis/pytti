@@ -3,3 +3,4 @@ __pycache__
 *.png
 tb.py
 loss.py
+inf.py

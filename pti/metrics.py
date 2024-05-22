@@ -21,8 +21,13 @@ class Metrics:
         
     def init_metrics(self):
         print("Initializing metrics")
-        self.f1 = F1Score(task="multiclass", num_classes=self.comps.classes)
-        # self.f1 = BinaryF1Score()
+        if self.comps.classes == 2:
+            self.f1 = BinaryF1Score()
+            print("Binary F1 score")
+        else:
+            self.f1 = F1Score(task="multiclass", num_classes=self.comps.classes)
+            print("F1 score")
+        
         self.f1.to(self.comps.device)
         self.get_current_timestamp()
         self.start_time = time.time()

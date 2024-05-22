@@ -36,7 +36,7 @@ class DataPreprocesing:
 
     def build_loaders(self):
         train_set      = loaders.Dataset(self.train_set_x, self.train_set_y, self.comps.classes)
-        params         = {'batch_size': 10, 'shuffle': True}
+        params         = {'batch_size': 10, 'shuffle': False}
         self.train_ldr = torch.utils.data.DataLoader(train_set, **params)
         valid_set      = loaders.Dataset(self.valid_set_x, self.valid_set_y, self.comps.classes)
         params         = {'batch_size': 10, 'shuffle': False}

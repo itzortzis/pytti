@@ -110,3 +110,4 @@ class AlexNet(nn.Module):
         out = self.fc1(out)
         out = self.fc2(out)
         return out
+    

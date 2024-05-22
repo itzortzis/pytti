@@ -5,6 +5,7 @@ import calendar
 import numpy as np
 from tqdm import tqdm
 from torchmetrics import F1Score
+from sklearn.metrics import accuracy_score, f1_score
 
 
 
@@ -129,13 +130,15 @@ class Training():
             labels = torch.argmax(y, dim=1)
             # print(preds,labels)
             score = self.metrics.f1.update(preds, labels)
+            current_score += f1_score(preds.cpu().detach().numpy(), labels.cpu().detach().numpy(), average='weighted')
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
-        epoch_score = self.metrics.f1.compute()
+        epoch_score = current_score/len(self.dpp.train_ldr)
+        # epoch_score = self.metrics.f1.compute()
         self.metrics.f1.reset()
         epoch_loss  = current_loss / len(self.dpp.train_ldr.dataset)
 
-        return epoch_score.item(), epoch_loss.item()
+        return epoch_score, epoch_loss.item()
 
     
  
@@ -164,12 +167,14 @@ class Training():
             preds = torch.argmax(outputs, dim=1)
             labels = torch.argmax(y, dim=1)
             score = self.metrics.f1.update(preds, labels)
+            current_score += f1_score(preds.cpu().detach().numpy(), labels.cpu().detach().numpy(), average='weighted')
             current_loss  += loss * self.dpp.train_ldr.batch_size
 
-        epoch_score = self.metrics.f1.compute()
+        epoch_score = current_score/len(self.dpp.valid_ldr)
+        # epoch_score = self.metrics.f1.compute()
         epoch_loss  = current_loss / len(self.dpp.valid_ldr.dataset)
 
-        return epoch_score.item(), epoch_loss.item()
+        return epoch_score, epoch_loss.item()
 
 
     # Inference:
@@ -193,8 +198,10 @@ class Training():
             preds = torch.argmax(outputs, dim=1)
             labels = torch.argmax(y, dim=1)
             score = self.metrics.f1.update(preds, labels)
+            current_score += f1_score(preds.cpu().detach().numpy(), labels.cpu().detach().numpy(), average='weighted')
 
-        test_set_score = self.metrics.f1.compute()
+        test_set_score = current_score/len(self.dpp.test_ldr)
+        # test_set_score = self.metrics.f1.compute()
         self.metrics.f1.reset()
         return test_set_score.item()
 
@@ -211,9 +218,10 @@ class Training():
 
             with torch.no_grad():
                 outputs = self.comps.model(x)
-
             preds = torch.argmax(outputs, dim=1)
-            self.f1.update(preds, y)
+            labels = torch.argmax(y, dim=1)
+            # preds = torch.argmax(outputs, dim=1)
+            self.f1.update(preds, labels)
 
         inf_score = self.f1.compute()
         self.f1.reset()

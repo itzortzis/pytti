@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='PTI',
-    version='0.2.3',
+    version='0.2.4',
     author='I.N.Tzortzis',
     author_email='i.n.tzortzis@gmail.com',
     description='PyTorch Training Inference Framework',
