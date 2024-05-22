@@ -24,7 +24,7 @@ class Training():
 
     def init(self):
         self.pr = Printer(self.comps)
-        self.dpp = DataPreprocesing(self.comps.sets)
+        self.dpp = DataPreprocesing(self.comps)
         self.dpp.run()
         self.metrics = Metrics(self.comps)
 
@@ -159,7 +159,7 @@ class Training():
 
             with torch.no_grad():
                 outputs = self.comps.model(x)
-            
+            m = torch.nn.Sigmoid()
             loss = self.comps.loss_fn(outputs, y.float())
             preds = torch.argmax(outputs, dim=1)
             labels = torch.argmax(y, dim=1)
@@ -203,7 +203,7 @@ class Training():
         path_to_model = self.comps.trained_models + self.comps.inf_model
         self.comps.model.load_state_dict(torch.load(path_to_model))
         self.comps.model.eval()
-        self.f1 = F1Score(task="multiclass", num_classes=5)
+        self.f1 = F1Score(task="multiclass", num_classes=self.comps.classes)
         self.f1.to(self.comps.device)
         # self.f1.reset()
         for x, y in set_ldr:

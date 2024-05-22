@@ -19,6 +19,7 @@ class Init:
 
 
     def init_parameters(self):
+        self.classes    = self.parameters['classes']
         self.epochs     = self.parameters['epochs']
         self.exp_name  = self.parameters['exp_name']
         self.epoch_thr  = self.parameters['epoch_thresh']

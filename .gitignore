@@ -1,3 +1,5 @@
 generated/
 __pycache__
 *.png
+tb.py
+loss.py
