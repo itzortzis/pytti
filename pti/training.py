@@ -156,7 +156,6 @@ class Training():
         current_score = 0.0
         current_loss = 0.0
         self.metrics.f1.reset()
-
         for x, y in self.dpp.valid_ldr:
             x, y = self.prepare_data(x, y)
 
@@ -169,7 +168,6 @@ class Training():
             score = self.metrics.f1.update(preds, labels)
             current_score += f1_score(preds.cpu().detach().numpy(), labels.cpu().detach().numpy(), average='weighted')
             current_loss  += loss * self.dpp.train_ldr.batch_size
-
         epoch_score = current_score/len(self.dpp.valid_ldr)
         # epoch_score = self.metrics.f1.compute()
         epoch_loss  = current_loss / len(self.dpp.valid_ldr.dataset)
@@ -212,6 +210,7 @@ class Training():
         self.comps.model.eval()
         self.f1 = F1Score(task="multiclass", num_classes=self.comps.classes)
         self.f1.to(self.comps.device)
+        current_score = 0.0
         # self.f1.reset()
         for x, y in set_ldr:
             x,  y = self.prepare_data(x, y)
@@ -221,8 +220,11 @@ class Training():
             preds = torch.argmax(outputs, dim=1)
             labels = torch.argmax(y, dim=1)
             # preds = torch.argmax(outputs, dim=1)
+            current_score += f1_score(preds.cpu().detach().numpy(), labels.cpu().detach().numpy(), average='weighted')
             self.f1.update(preds, labels)
 
-        inf_score = self.f1.compute()
+        inf_score = current_score/len(set_ldr)
+        
+        # inf_score = self.f1.compute()
         self.f1.reset()
         return inf_score.item()

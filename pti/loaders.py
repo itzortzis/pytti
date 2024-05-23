@@ -16,7 +16,7 @@ class Dataset(torch.utils.data.Dataset):
             y = self.create_y(self.set_y[index])
         else:
             y = np.zeros((2), dtype=np.float16)
-            if self.set_y[index] <= 3:
+            if self.set_y[index] < 3:
                 y[0] = 1
             else:
                 y[1] = 1
