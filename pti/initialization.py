@@ -1,3 +1,5 @@
+import os
+import calendar
 
 class Init:
     def __init__(self, components, params, paths):
@@ -26,9 +28,20 @@ class Init:
         self.score_thr  = self.parameters['score_thresh']
         self.device     = self.parameters['device']
         self.batch_size = self.parameters['batch_size']
-        self.inf_model  = self.parameters['inf_model_name']
 
     def init_paths(self):
         self.trained_models = self.paths['trained_models']
         self.metrics = self.paths['metrics']
         self.figures = self.paths['figures']
+
+    def create_exp_dir():
+        current_GMT = time.gmtime()
+        timestamp = calendar.timegm(current_GMT)
+        exp_dir = "exp_" + str(timestamp)
+
+        try:
+            os.mkdir(exp_dir)
+        except OSError as error:
+            print(error)
+
+        self.exp_name = exp_dir

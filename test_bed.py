@@ -8,12 +8,12 @@ from pti.models import AlexNet
 
 
 
-train_set_x = np.zeros((500, 256, 256))
-train_set_y = np.zeros((500))
-valid_set_x = np.zeros((100, 256, 256))
-valid_set_y = np.zeros((100))
-test_set_x = np.zeros((50, 256, 256))
-test_set_y = np.zeros((50))
+train_set_x = np.zeros((200, 256, 256))
+train_set_y = np.zeros((200))
+valid_set_x = np.zeros((50, 256, 256))
+valid_set_y = np.zeros((50))
+test_set_x = np.zeros((20, 256, 256))
+test_set_y = np.zeros((20))
 
 learning_rate = 0.00000001
 classes = 5
@@ -45,7 +45,6 @@ params = {
     'score_thresh': 0.75,
     'device': 'cuda',
     'batch_size': 10,
-    'inf_model_name': 'INBreast_bad_0_1000_1713349397.pth',
 }
 tr_paths = {
     'trained_models': './generated/trained_models/',
