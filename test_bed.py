@@ -2,9 +2,9 @@
 import torch
 import numpy as np
 
-from pti.training import Training
-from pti.models import ConvNeuralNet_b
-from pti.models import AlexNet
+from pytti.training import Training
+from pytti.models import ConvNeuralNet_b
+from pytti.models import AlexNet
 
 
 

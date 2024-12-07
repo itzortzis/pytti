@@ -13,10 +13,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url='https://github.com/itzortzis/pytorch-training-inference',
     project_urls = {
-        "Code": "https://github.com/itzortzis/pytorch-training-inference",
-        "Bug Tracker": "https://github.com/itzortzis/pytorch-training-inference/issues"
+        "Code": "https://github.com/itzortzis/pytti",
+        "Bug Tracker": "https://github.com/itzortzis/pytti/issues"
     },
     license='GPL-3.0',
-    packages=['pti'],
+    packages=['pytti'],
     install_requires=['numpy', 'torch', 'tqdm', 'matplotlib']#, 'csv', 'sklearn.cluster', 'skimage.color', 'calendar', 'torchmetrics'],
 )

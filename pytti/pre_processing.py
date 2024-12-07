@@ -1,5 +1,5 @@
 import torch
-import pti.loaders as loaders
+import pytti.loaders as loaders
 import numpy as np
 
 class DataPreprocesing:

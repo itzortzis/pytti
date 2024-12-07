@@ -9,10 +9,10 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 
-from pti.pre_processing import DataPreprocesing
-from pti.initialization import Init
-from pti.printer import Printer
-from pti.metrics import Metrics
+from pytti.pre_processing import DataPreprocesing
+from pytti.initialization import Init
+from pytti.printer import Printer
+from pytti.metrics import Metrics
 
 
 class Training():
