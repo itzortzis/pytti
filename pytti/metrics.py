@@ -63,6 +63,10 @@ class Metrics:
             self.log_line = log
             self.max_score = score
             
+            return True
+        
+        return False
+            
             
     def save_metrics(self):
         prefix = self.comps.exp_name + "/metrics/"

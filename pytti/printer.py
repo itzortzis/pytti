@@ -3,6 +3,7 @@ class Printer:
         self.comps = comps
         self.print_logo()
         self.print_train_details()
+        self.debug = True
         
         
     def print_logo(self):
@@ -20,4 +21,14 @@ class Printer:
         print()
         # option = input("Do you wish to continue? [Y/n]: ")
         return True or (option == 'Y' or option == 'y')
+    
+    def print_epoch_details(self, tr_score, tr_loss, vl_score, vl_loss):
+        if not self.debug:
+            return
+        # print()
+        print()
+        print("\t Training - Score: ", tr_score, " Loss: ", tr_loss)
+        print("\t Validation: - Score: ", vl_score, " Loss: ", vl_loss)
+        print()
+        
         

@@ -53,13 +53,11 @@ class Training():
             self.metrics.losses[epoch, 1] = vl_loss
             self.metrics.scores[epoch, 0] = tr_score
             self.metrics.scores[epoch, 1] = vl_score
-
-            print()
-            print("\t Training - Score: ", tr_score, " Loss: ", tr_loss)
-            print("\t Validation: - Score: ", vl_score, " Loss: ", vl_loss)
-            print()
-            self.metrics.save_model_weights(epoch, vl_score, self.comps.model.state_dict())
-            self.comps.model_dict = self.comps.model.state_dict()
+            
+            self.pr.print_epoch_details(tr_score, tr_loss, vl_score, vl_loss)
+            
+            if self.metrics.save_model_weights(epoch, vl_score, self.comps.model.state_dict()):
+                self.comps.model_dict = self.comps.model.state_dict()
         self.metrics.calculate_exec_time()
         self.metrics.test_set_score = self.inference()
         self.metrics.update_log()
