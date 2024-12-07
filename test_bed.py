@@ -40,16 +40,11 @@ comps = {
 params = {
     'classes': classes,
     'epochs': 100,
-    'exp_name': 'INBreast_bad_0_1000',
     'epoch_thresh': 40,
     'score_thresh': 0.75,
     'device': 'cuda',
     'batch_size': 10,
 }
-tr_paths = {
-    'trained_models': './generated/trained_models/',
-    'metrics': './generated/metrics/',
-    'figures': './generated/figures/'
-}
-t = Training(comps, params, tr_paths)
+
+t = Training(comps, params)
 t.main_training()

@@ -11,14 +11,14 @@ from sklearn.metrics import accuracy_score, f1_score
 
 from pti.pre_processing import DataPreprocesing
 from pti.initialization import Init
-from pti.print_info import Printer
+from pti.printer import Printer
 from pti.metrics import Metrics
 
 
 class Training():
 
-    def __init__(self, comps, params, paths):
-        self.comps = Init(comps, params, paths)
+    def __init__(self, comps, params):
+        self.comps = Init(comps, params)
         self.comps.run()
         self.init()
 

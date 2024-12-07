@@ -16,8 +16,6 @@ class Printer:
         print('\t Training epochs: ', self.comps.epochs)
         print('\t Epoch threshold: ', self.comps.epoch_thr)
         print('\t Score threshold: ', self.comps.score_thr)
-        print('\t Trained models path: ', self.comps.trained_models)
-        print('\t Metrics path: ', self.comps.metrics)
         print('\t Device: ', self.comps.device)
         print()
         # option = input("Do you wish to continue? [Y/n]: ")

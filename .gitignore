@@ -4,3 +4,4 @@ __pycache__
 tb.py
 loss.py
 inf.py
+exp_*

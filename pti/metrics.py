@@ -15,7 +15,7 @@ class Metrics:
         self.scores = np.zeros((self.comps.epochs, 2))
         self.max_score = 0
         self.log_line = ""
-        self.log = open("logs.txt", "a")  # append mode
+        self.log = open(self.comps.exp_name + "/log.txt", "a")  # append mode
         self.test_set_score = 0.0
         
         
@@ -57,8 +57,7 @@ class Metrics:
     def save_model_weights(self, epoch, score, model_state_dict):
 
         if score > self.max_score and epoch > self.comps.epoch_thr:
-            path_to_model = self.comps.trained_models + self.comps.exp_name
-            path_to_model += "_" + str(self.timestamp) + ".pth"
+            path_to_model = self.comps.exp_name + '/best_model.pth'
             torch.save(model_state_dict, path_to_model)
             log = str(epoch) + " " + str(score) + " " + path_to_model + "\n"
             self.log_line = log
@@ -66,27 +65,27 @@ class Metrics:
             
             
     def save_metrics(self):
-        postfix = self.comps.exp_name + "_" + str(self.timestamp)
-        np.save(self.comps.metrics + "scores_" + postfix, self.scores)
-        np.save(self.comps.metrics + "losses_" + postfix, self.losses)
+        prefix = self.comps.exp_name + "/metrics/"
+        np.save(prefix + "scores", self.scores)
+        np.save(prefix + "losses", self.losses)
         self.save_figures()
         
     
     def save_figures(self):
-        postfix = self.comps.exp_name + "_" + str(self.timestamp) + ".png"
+        prefix = self.comps.exp_name + "/figures/"
         plt.figure()
         plt.plot(self.scores[:, 0])
-        plt.savefig(self.comps.figures + "train_s_" + postfix)
+        plt.savefig(prefix + "train_score.png")
         plt.figure()
         plt.plot(self.scores[:, 1])
-        plt.savefig(self.comps.figures + "valid_s_" + postfix)
+        plt.savefig(prefix + "valid_score.png")
 
         plt.figure()
         plt.plot(self.losses[:, 0])
-        plt.savefig(self.comps.figures + "train_l_" + postfix)
+        plt.savefig(prefix + "train_loss.png")
         plt.figure()
         plt.plot(self.losses[:, 1])
-        plt.savefig(self.comps.figures + "valid_l_" + postfix)
+        plt.savefig(prefix + "valid_loss.png")
 
 
     def update_log(self):
