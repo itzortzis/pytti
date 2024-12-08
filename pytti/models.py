@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 import torch.nn.functional as F
 
@@ -171,3 +172,50 @@ class ConvNeuralNet(nn.Module):
         out = F.softmax(out, dim = 1)
 
         return out
+    
+    
+
+class CNNInterpolator3D(nn.Module):
+    def __init__(self, in_channels=1, out_channels=1):
+        super(CNNInterpolator3D, self).__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Conv3d(in_channels, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool3d(2),
+
+            nn.Conv3d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool3d(2),
+
+            nn.Conv3d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool3d(2),
+        )
+        
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose3d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            
+            nn.ConvTranspose3d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            
+            nn.ConvTranspose3d(64, out_channels, kernel_size=3, stride=2, padding=1, output_padding=1),
+        )
+
+        self.final_conv = nn.Conv2d(64, out_channels, kernel_size=3, padding=1)
+
+    def forward(self, x):
+        # Forward pass through encoder
+        x = self.encoder(x)
+        
+        # Decoder - Upsample to the target 2D slice
+        x = self.decoder(x)
+        
+        # Remove depth dimension (squeeze it out)
+        x = x.squeeze(2)  # (batch_size, 64, 512, 512)
+        
+        # Apply final 2D convolution to get the 2D slice
+        x = self.final_conv(x)  # Final output shape (batch_size, 512, 512)
+        
+        return x

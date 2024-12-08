@@ -6,11 +6,8 @@ class DataPreprocesing:
     def __init__(self, comps):
         self.comps = comps
         self.train_set_x = self.comps.sets['training_set_x']
-        self.train_set_y = self.comps.sets['training_set_y']
         self.valid_set_x = self.comps.sets['validation_set_x']
-        self.valid_set_y = self.comps.sets['validation_set_y']
         self.test_set_x = self.comps.sets['test_set_x']
-        self.test_set_y = self.comps.sets['test_set_y']
         
         
     def run(self):
@@ -35,12 +32,12 @@ class DataPreprocesing:
 
 
     def build_loaders(self):
-        train_set      = loaders.Dataset(self.train_set_x, self.train_set_y, self.comps.classes)
-        params         = {'batch_size': 10, 'shuffle': True}
+        train_set      = loaders.Dataset(self.train_set_x)
+        params         = {'batch_size': self.comps.batch_size, 'shuffle': True}
         self.train_ldr = torch.utils.data.DataLoader(train_set, **params)
-        valid_set      = loaders.Dataset(self.valid_set_x, self.valid_set_y, self.comps.classes)
-        params         = {'batch_size': 10, 'shuffle': False}
+        valid_set      = loaders.Dataset(self.valid_set_x)
+        params         = {'batch_size': self.comps.batch_size, 'shuffle': False}
         self.valid_ldr = torch.utils.data.DataLoader(valid_set, **params)
-        test_set       = loaders.Dataset(self.test_set_x, self.test_set_y, self.comps.classes)
-        params         = {'batch_size': 10, 'shuffle': False}
+        test_set       = loaders.Dataset(self.test_set_x)
+        params         = {'batch_size': self.comps.batch_size, 'shuffle': False}
         self.test_ldr  = torch.utils.data.DataLoader(test_set, **params)

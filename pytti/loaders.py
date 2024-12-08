@@ -1,33 +1,28 @@
 import numpy as np
+import random
 import torch
 
+
+# set_x shape: (number_of_patients, channels, width, height, depth)
+
 class Dataset(torch.utils.data.Dataset):
-    def __init__(self, set_x, set_y, num_of_classes):
+    def __init__(self, set_x):
         self.set_x = set_x
-        self.set_y = set_y
-        self.num_of_classes = num_of_classes
 
     def __len__(self):
-        return len(self.set_y)
+        return len(self.set_x)
 
     def __getitem__(self, index):
-
-        if self.num_of_classes > 2:
-            y = self.create_y(self.set_y[index])
-        else:
-            y = np.zeros((2), dtype=np.float16)
-            if self.set_y[index] < 3:
-                y[0] = 1
-            else:
-                y[1] = 1
-
-        x = torch.from_numpy(self.set_x[index, :, :])
-        y = torch.from_numpy(y)
+        
+        slice = random.randint(0, self.set_x.shape[4])
+        
+        x_np = self.set_x[index, :, :, :, :].copy()
+        x_np[:, :, :, slice] = 0
+        
+        y_np = np.zeros(x_np.shape)
+        y_np[:, :, :, slice] = self.set_x[index, :, :, :, slice].copy()
+        
+        x = torch.from_numpy(x_np)
+        y = torch.from_numpy(y_np)
         
         return x, y
-    
-    def create_y(self, v):
-        value = int(v)
-        y = np.zeros((self.num_of_classes), dtype=np.float16)
-        y[value-1] = 1
-        return y
