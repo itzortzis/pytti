@@ -2,6 +2,7 @@ import time
 import torch
 import calendar
 import numpy as np
+from tqdm import tqdm, trange
 from torchmetrics import F1Score
 from torchmetrics.classification import BinaryF1Score
 from matplotlib import pyplot as plt
@@ -17,6 +18,7 @@ class Metrics:
         self.log_line = ""
         self.log = open(self.comps.exp_name + "/log.txt", "a")  # append mode
         self.test_set_score = 0.0
+        self.tqdm_ = trange(self.comps.epochs, desc='Metrics', leave=True)
         
         
     def init_metrics(self):
@@ -98,3 +100,13 @@ class Metrics:
         self.log.write(self.log_line)
         self.log.close()
         print("Total execution time: ", self.exec_time, " seconds")
+
+
+    def update_tqdm(self, tr_score, tr_loss, vl_score, vl_loss):
+        metrics = str(round(tr_score, 2))
+        metrics += ", " + str(round(tr_loss, 2))
+        metrics += ", " + str(round(vl_score, 2))
+        metrics += ", " + str(round(vl_loss, 2))
+        
+        self.tqdm_.set_description(metrics)
+        self.tqdm_.refresh()

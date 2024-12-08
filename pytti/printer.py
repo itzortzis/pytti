@@ -3,7 +3,7 @@ class Printer:
         self.comps = comps
         self.print_logo()
         self.print_train_details()
-        self.debug = True
+        self.debug = False
         
         
     def print_logo(self):

@@ -3,7 +3,6 @@ import time
 import torch
 import calendar
 import numpy as np
-from tqdm import tqdm
 from torchmetrics import F1Score
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -44,7 +43,7 @@ class Training():
         if not (self.pr.print_train_details()):
             return
         self.metrics.init_metrics()
-        for epoch in tqdm(range(self.comps.epochs)):
+        for epoch in self.metrics.tqdm_:#tqdm(range(self.comps.epochs)):
             
             tr_score, tr_loss = self.epoch_training()
             vl_score, vl_loss = self.epoch_validation()
@@ -54,7 +53,8 @@ class Training():
             self.metrics.scores[epoch, 0] = tr_score
             self.metrics.scores[epoch, 1] = vl_score
             
-            self.pr.print_epoch_details(tr_score, tr_loss, vl_score, vl_loss)
+            # self.pr.print_epoch_details(tr_score, tr_loss, vl_score, vl_loss)
+            self.metrics.update_tqdm(tr_score, tr_loss, vl_score, vl_loss)
             
             if self.metrics.save_model_weights(epoch, vl_score, self.comps.model.state_dict()):
                 self.comps.model_dict = self.comps.model.state_dict()
